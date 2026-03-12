@@ -1,0 +1,2 @@
+DROP INDEX IF EXISTS idx_cursos_url;
+DROP TABLE IF EXISTS cursos;

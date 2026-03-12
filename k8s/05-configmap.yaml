@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agroscrapper-config
+  namespace: agroscrapper
+data:
+  LOG_LEVEL: "info"
+  SCRAPER_DELAY: "1s"
+  SCRAPER_PARALLELISM: "3"
+  TARGET_URL: "https://formacionagraria.tenerife.es/"

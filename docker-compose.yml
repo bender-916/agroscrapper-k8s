@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: docker.io/bitnami/postgresql:16.4.0-debian-12-r20
+    environment:
+      POSTGRESQL_USERNAME: agroscrapper
+      POSTGRESQL_PASSWORD: localdev
+      POSTGRESQL_DATABASE: agroscrapper
+    volumes:
+      - postgres_data:/bitnami/postgresql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "agroscrapper"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Containerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://agroscrapper:localdev@postgres:5432/agroscrapper?sslmode=disable
+    command: ["/agroscrapper", "-migrate"]
+
+  agroscrapper:
+    build:
+      context: .
+      dockerfile: Containerfile
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN:-dummy_token}
+      TELEGRAM_CHATID: ${TELEGRAM_CHATID:-dummy_chatid}
+      TELEGRAM_THREADID: ${TELEGRAM_THREADID:-}
+      DATABASE_URL: postgres://agroscrapper:localdev@postgres:5432/agroscrapper?sslmode=disable
+      LOG_LEVEL: debug
+
+volumes:
+  postgres_data:
